@@ -1,0 +1,41 @@
+import numpy as np
+
+def vi_policy(x_d_int: int, max_sweeps: int = 5000, tol: float = 1e-10):
+    
+    S = 1 << n
+    A = len(ALL_ACTIONS)
+
+    V = np.zeros(S, dtype=float)
+    V[x_d_int] = 1.0
+
+    for _ in range(max_sweeps):
+        V_old = V.copy()
+        for x in ALL_STATES:
+            if x == x_d_int:
+                V[x] = 1.0
+            else:
+                best = -1.0
+                for u in ALL_ACTIONS:
+                    val = gamma * expected_next_V(x, u, V_old)
+                    if val > best:
+                        best = val
+                V[x] = best
+        if np.max(np.abs(V - V_old)) < tol:
+            break
+
+    pi_idx = np.zeros(S, dtype=int)
+    for x in ALL_STATES:
+        if x == x_d_int:
+            pi_idx[x] = 0
+        else:
+            best = -1.0
+            best_a = 0
+            for a_idx, u in enumerate(ALL_ACTIONS):
+                val = gamma * expected_next_V(x, u, V)
+                if val > best:
+                    best = val
+                    best_a = a_idx
+            pi_idx[x] = best_a
+
+    pi_u = [ALL_ACTIONS[i] for i in pi_idx]
+    return pi_idx, pi_u, V
